@@ -8,8 +8,13 @@ We recommend a conda-based installation as it is faster to setup.
 `conda install -c conda-forge mamba`
 3. Create a new environment and install the dependencies  
 ```
-conda create -n methylation  
-conda activate methylation  
+# Create the environment
+conda create -n methylation --yes
+
+# Activate the environment
+conda activate methylation
+
+# Install the required dependencies
 mamba install -c conda-forge -c bioconda bedtools bismark parallel pandas samtools trim-galore xlsxwriter
 ```  
 
@@ -19,7 +24,7 @@ which bedtools bismark bismark_methylation_extractor parallel samtools trim_galo
 ```
 
 ## Prepare the genomes
-The pipeline requires both C->T (forward strand amplicons) and G->A (reverse strand amplicons) converted genome references available.  The following set of lines shows how one can download and create these references for this pipeline:
+Since our panel is designed to have amplicons with forward and reverse strand amplification (irrespective of the direction of the gene on the genome), we need to ensure that both forward (C->T) and reverse (G->A) strand bisulfite converted genomes references are available. The easiest way to create these references for the pipeline is to use bismark's genome preparation utility (`bismark_genome_preparation`). Feel free to supply N/2 threads for N available threads on your hardware using the `--parallel` option. The `bismark_genome_preparation` launches 2 instances of indexing and passes the input threads as is to both instances.
 ```
 # Download the genomes
 (seq 1 22; echo -e "X\nY\nM") | xargs -I CHROM -P 4 wget https://hgdownload.soe.ucsc.edu/goldenPath/hg19/chromosomes/chrCHROM.fa.gz
@@ -59,13 +64,20 @@ This will create the following directory structure:
 
 **The directory where `Bisulfite_Genome` directory resides, is our *reference genome* directory**
 
-## Running the pipeline
-Assuming the pipeline is discoverable/in a $PATH directory, the following is a typical pipeline execution:
-```
-pillar_methylation.py -i <input_directory> -o <output_directory> -t <parallel_threads> -g <reference_directory_location> -n <run_name>
-```
 
-Optionally, the user can also supply a BED file of input regions that they are interested in quantifying methylation levels for:
+**Please note that the directory where `Bisulfite_Genome` resides, is considered the *reference genome* directory by this script.**
+E.g., if the full path to `Bisulfite_Genome` is `/home/user/methylation/reference/Bisulfite_Genome`, then use `/home/user/methylation/reference/` as the reference genome directory path as an input to the pipeline.
+
+## Running the pipeline
+Assuming that the pipeline is located in discoverable/$PATH directories and has the execute permission turned on, the following command syntax would launch a run:  
+  
 ```
-pillar_methylation.py -i <input_directory> -o <output_directory> -t <parallel_threads> -g <reference_directory_location> -n <run_name> -b <input_bed_file>
+pillar_methylation.py -i <input_FASTQ_directories> -o <output_directory_name> -t <num_of_threads> -g <reference_genome_directory_path> -n <run_name>
+```
+  
+Please note that the pipeline is designed to identify and pair Illumina named read files. If your file names have been altered and are no longer following Illumina's naming convention, the pipeline will fail to pair the samples correctly.  
+  
+Additionally, using the -b option, users can also supply a BED file containing regions of interest, for which they'd like to generate summary information via the pipeline:
+```
+pillar_methylation.py -i <input_FASTQ_directories> -o <output_directory_name> -t <num_of_threads> -g <reference_genome_directory_path> -n <run_name> -b <BED_file_path>
 ```
