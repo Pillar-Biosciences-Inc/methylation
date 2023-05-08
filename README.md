@@ -1,5 +1,5 @@
 # Pillar's methylation analysis script
-An open-source, Bismark based pipeline for processing methylation sequencing data.
+An open-source, Bismark-based pipeline for processing methylation sequencing data. The pipeline is a wrapper around several open-source software and libraries, and is designed to work on Illumina generated FASTQ files. The output of the script is an excel file that summarizes several important output metrics from the pipeline.
 
 ## Installation
 We recommend a conda-based installation as it is faster to setup.  
